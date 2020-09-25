@@ -1,0 +1,12 @@
+{
+  "name": "testconsole",
+  "version": "1.0.0",
+  "description": "Script encargado de calcular los macronutrientes necesarios en una dieta",
+  "main": "dietx.js",
+  "scripts": {
+    "start" : "node dietx.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "cristian rojas",
+  "license": "MIT"
+}
