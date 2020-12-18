@@ -3,6 +3,9 @@ Author Cristian Rojas
 Date 2 de Dic del 2018
 */
 
+//Importamos los alimentos
+const { foods } = require('./foods');
+
 //Se declaran variables globales.
 let gl_sex = null; //Sexo
 let gl_weight = null; //Peso
@@ -38,11 +41,6 @@ const act =[{
             rate : 20
         }
         ];
-
-let standard_input = process.stdin;
-
-//Seteamos el encoding del los caracteres que vamos a recibir
-standard_input.setEncoding('utf-8');
 
 
 //Esta funcion se encarga de calcular la taza metabolica basal
@@ -115,6 +113,11 @@ function calculateMacros(calories){
 
 // When user input data and click enter key.
 function inputData(text){
+    const standard_input = process.stdin;
+
+    //Seteamos el encoding del los caracteres que vamos a recibir
+    standard_input.setEncoding('utf-8');
+
     console.log(text);
     return new Promise((resolve) => {
         standard_input.on('data', function (data) {
@@ -125,10 +128,11 @@ function inputData(text){
                 resolve(dataToUpper);
                 //process.stdin.pause();
             } 
+            //Renovemos el listener creado para escuchar
+            standard_input.removeAllListeners();
         });
     });
 }
-
 
 async function  Main(){
 
@@ -166,8 +170,61 @@ async function  Main(){
     //Se debe calcular las calorias a consumir.
     let calories = calculateCalories(gl_rate_objective);
 
-    calculateMacros(calories);
+    const macros = calculateMacros(calories);
 
+    //Cantidad de comidas al dia
+    showTex = 'Cantidad de comidas al dia?\n';
+
+    const quantityMeal = await inputData(showTex);
+
+    calculateMeals(macros, Number(quantityMeal));
 }
 
+async function calculateMeals(macros, quantityMeal) {
+
+    //Recorremos la cantidad de comidas
+    for (let i = 0; i  < quantityMeal; i ++) {
+
+        let foodsSelect = [];
+        console.log("Comida numero " + (i + 1) + "\n");
+
+        let selectFood = async (name, foods) => {
+            let food;
+            let showTex =  `Listado de ${name}\n` ;
+    
+            for(let indexFood in foods) {
+                let number = Number(indexFood) + 1;
+                showTex += `${number} - ${foods[indexFood].name}\n`;
+            }
+            showTex += "N - Nada\n" ;
+            let foodSelected = await inputData(showTex);
+            if ( !isNaN(foodSelected)) {
+                food = foods[foodSelected - 1];          
+            } 
+            return food;
+        }
+
+        //Obtenemos las proteinas
+        let foodProtein = await selectFood("proteinas", foods.proteins);
+
+        if (foodProtein !== undefined) {
+            foodsSelect.push(foodProtein);
+        }
+
+        //Obtenemos las carbohidratos
+        let foodCarbohydrate = await selectFood("carbohidratos", foods.carbohydrates);
+
+        if (foodCarbohydrate !== undefined) {
+            foodsSelect.push(foodCarbohydrate);
+        }
+
+        //Obtenemos las grasas
+        let foodFats = await selectFood("grasas", foods.fats);
+        if (foodFats !== undefined) {
+            foodsSelect.push(foodFats);
+        } 
+    
+        console.log(foodsSelect);
+    }
+}
 Main();
